@@ -1,18 +1,13 @@
-"use client";
+import "./globals.css";
 
-import dynamic from "next/dynamic";
-import AddPump from "../components/AddPump";
+export const metadata = {
+  title: "Fuel Map BD",
+};
 
-const Map = dynamic(() => import("../components/Map"), {
-  ssr: false,
-});
-
-export default function Page() {
+export default function RootLayout({ children }) {
   return (
-    <div>
-      <h1 style={{ textAlign: "center" }}>⛽ Fuel Map BD</h1>
-      <AddPump />
-      <Map />
-    </div>
+    <html>
+      <body>{children}</body>
+    </html>
   );
 }
