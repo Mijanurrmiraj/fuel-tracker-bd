@@ -7,13 +7,15 @@ import {
   Popup,
   useMapEvents,
 } from "react-leaflet";
+
 import { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+
 import { db } from "../lib/firebase";
 import { ref, push, onValue } from "firebase/database";
 
-// Fix marker
+// 🔥 Leaflet icon fix
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -24,21 +26,27 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Click map
-function LocationMarker({ setPosition }) {
+// 📍 Map click handler
+function ClickHandler({ setLocation }) {
   useMapEvents({
     click(e) {
-      setPosition(e.latlng);
+      setLocation(e.latlng);
     },
   });
   return null;
 }
 
 export default function Map() {
-  const [position, setPosition] = useState(null);
+  const [location, setLocation] = useState(null);
   const [pumps, setPumps] = useState([]);
 
-  // Load Firebase data
+  // 🔥 Form state
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [fuel, setFuel] = useState("");
+  const [minutes, setMinutes] = useState("");
+
+  // 🔥 Load realtime data
   useEffect(() => {
     const pumpRef = ref(db, "pumps");
 
@@ -50,19 +58,26 @@ export default function Map() {
     });
   }, []);
 
-  // Save pump
+  // ➕ Add pump
   const savePump = () => {
-    if (!position) return alert("লোকেশন সিলেক্ট করো!");
+    if (!name || !fuel || !minutes || !location) {
+      return alert("সব তথ্য পূরণ করো");
+    }
 
-    const pumpRef = ref(db, "pumps");
-
-    push(pumpRef, {
-      lat: position.lat,
-      lng: position.lng,
-      time: Date.now(),
+    push(ref(db, "pumps"), {
+      name,
+      fuel,
+      minutes,
+      lat: location.lat,
+      lng: location.lng,
+      createdAt: Date.now(),
     });
 
-    alert("Pump Added ✅");
+    setShowForm(false);
+    setName("");
+    setFuel("");
+    setMinutes("");
+    setLocation(null);
   };
 
   return (
@@ -74,34 +89,104 @@ export default function Map() {
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+        {/* Click */}
+        <ClickHandler setLocation={setLocation} />
+
+        {/* Existing pumps */}
         {pumps.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]}>
-            <Popup>Fuel Pump</Popup>
+            <Popup>
+              <b>{p.name}</b> <br />
+              ⛽ {p.fuel} <br />
+              ⏳ {p.minutes} min
+            </Popup>
           </Marker>
         ))}
 
-        {position && <Marker position={position}></Marker>}
-
-        <LocationMarker setPosition={setPosition} />
+        {/* Selected location */}
+        {location && <Marker position={location}></Marker>}
       </MapContainer>
 
-      {/* Floating Button */}
+      {/* ➕ Floating Button */}
       <button
-        onClick={savePump}
+        onClick={() => {
+          if (!location) return alert("আগে map এ click করো");
+          setShowForm(true);
+        }}
         style={{
           position: "fixed",
-          bottom: "20px",
-          right: "20px",
+          bottom: 80,
+          right: 20,
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
           background: "#ff5722",
           color: "#fff",
-          padding: "14px",
-          borderRadius: "50%",
+          fontSize: 28,
           border: "none",
-          fontSize: "18px",
+          zIndex: 999,
         }}
       >
         +
       </button>
+
+      {/* 🔥 Bottom Form */}
+      {showForm && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            width: "100%",
+            background: "#fff",
+            padding: 20,
+            borderRadius: "20px 20px 0 0",
+            boxShadow: "0 -5px 20px rgba(0,0,0,0.3)",
+            zIndex: 1000,
+          }}
+        >
+          <h3>Add Fuel Pump</h3>
+
+          <input
+            placeholder="Pump Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{ width: "100%", padding: 10, marginBottom: 10 }}
+          />
+
+          <select
+            value={fuel}
+            onChange={(e) => setFuel(e.target.value)}
+            style={{ width: "100%", padding: 10, marginBottom: 10 }}
+          >
+            <option value="">Fuel Type</option>
+            <option>Petrol</option>
+            <option>Diesel</option>
+            <option>Octane</option>
+          </select>
+
+          <input
+            type="number"
+            placeholder="Minutes থাকবে"
+            value={minutes}
+            onChange={(e) => setMinutes(e.target.value)}
+            style={{ width: "100%", padding: 10, marginBottom: 10 }}
+          />
+
+          <button
+            onClick={savePump}
+            style={{
+              width: "100%",
+              padding: 12,
+              background: "green",
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+            }}
+          >
+            ✅ Save Pump
+          </button>
+        </div>
+      )}
     </>
   );
 }
