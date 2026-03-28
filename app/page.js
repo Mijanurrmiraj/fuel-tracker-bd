@@ -1,247 +1,103 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { db } from "../lib/firebase";
+import Map from "@/components/Map";
+import { db } from "@/lib/firebase";
 import { ref, push, onValue } from "firebase/database";
-
-const Map = dynamic(() => import("../components/Map"), { ssr: false });
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [pumps, setPumps] = useState([]);
-  const [showForm, setShowForm] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
+  const [name, setName] = useState("");
   const [fuelType, setFuelType] = useState("");
   const [minutes, setMinutes] = useState("");
-  const [name, setName] = useState("");
 
-  // 🔥 Realtime sync
+  // 🔥 Load realtime data
   useEffect(() => {
-    const pumpsRef = ref(db, "pumps");
+    const pumpRef = ref(db, "pumps");
 
-    onValue(pumpsRef, (snapshot) => {
+    onValue(pumpRef, (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        setPumps(Object.values(data));
-      }
+      if (!data) return setPumps([]);
+
+      const list = Object.values(data);
+      setPumps(list);
     });
   }, []);
 
-  // ➕ Add pump
-  const addPump = (lat, lng) => {
-    if (!fuelType || !minutes || !name) {
-      return alert("সব তথ্য দিন");
+  // 🔥 Add pump
+  const addPump = (loc) => {
+    setSelectedLocation(loc);
+    setFormOpen(true);
+  };
+
+  const savePump = () => {
+    if (!name || !fuelType || !minutes) {
+      return alert("সব পূরণ করো");
     }
 
     push(ref(db, "pumps"), {
-      lat,
-      lng,
       name,
       fuelType,
-      minutes: parseInt(minutes),
-      createdAt: Date.now(),
+      minutes,
+      lat: selectedLocation.lat,
+      lng: selectedLocation.lng,
+      createdAt: Date.now()
     });
 
-    setShowForm(false);
+    setFormOpen(false);
+    setName("");
     setFuelType("");
     setMinutes("");
-    setName("");
   };
 
   return (
-    <div>
-      {/* HEADER */}
-      <div style={{
-        background: "#000",
-        color: "#fff",
-        padding: 12,
-        textAlign: "center",
-        fontWeight: "bold"
-      }}>
+    <>
+      {/* Header */}
+      <div className="header">
         ⛽ Fuel Map BD
       </div>
 
-      {/* MAP */}
-      <Map pumps={pumps} onAddPump={(lat, lng) => {
-        setShowForm(true);
-        window.selectedLocation = { lat, lng };
-      }} />
+      {/* Map */}
+      <Map pumps={pumps} addPump={addPump} />
 
-      {/* ➕ FLOAT BUTTON */}
-      <button
-        onClick={() => setShowForm(true)}
-        style={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          background: "#ff3d00",
-          color: "#fff",
-          border: "none",
-          padding: 15,
-          borderRadius: "50%",
-          fontSize: 20,
-          zIndex: 1000
-        }}
-      >
-        +
-      </button>
+      {/* Bottom Form */}
+      {formOpen && (
+        <div className="bottomSheet">
+          <h3>Add Fuel Pump</h3>
 
-      {/* 🔥 FULL SCREEN FORM (MOBILE FIX) */}
-      {showForm && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          background: "#fff",
-          zIndex: 2000,
-          overflowY: "auto",
-          padding: 20
-        }}>
-          <h2>Add Fuel Pump</h2>
-
-          {/* Pump Name */}
           <input
-            type="text"
             placeholder="Pump Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 12,
-              marginBottom: 10
-            }}
           />
 
-          {/* Fuel */}
-          <select
-            value={fuelType}
-            onChange={(e) => setFuelType(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 12,
-              marginBottom: 10
-            }}
-          >
-            <option value="">Select Fuel</option>
+          <select onChange={(e) => setFuelType(e.target.value)}>
+            <option>Select Fuel</option>
             <option>Petrol</option>
-            <option>Octane</option>
             <option>Diesel</option>
+            <option>Octane</option>
           </select>
 
-          {/* Minutes */}
           <input
-            type="number"
-            placeholder="কত মিনিট তেল থাকবে"
+            placeholder="Minutes থাকবে"
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 12,
-              marginBottom: 10
-            }}
           />
 
-          {/* Save */}
-          <button
-            onClick={() =>
-              addPump(
-                window.selectedLocation?.lat || 23.7,
-                window.selectedLocation?.lng || 90.4
-              )
-            }
-            style={{
-              width: "100%",
-              padding: 15,
-              background: "green",
-              color: "#fff",
-              border: "none",
-              borderRadius: 10,
-              fontSize: 16
-            }}
-          >
-            ✅ Save Pump
-          </button>
-
-          {/* Cancel */}
-          <button
-            onClick={() => setShowForm(false)}
-            style={{
-              width: "100%",
-              padding: 12,
-              marginTop: 10,
-              background: "#ccc",
-              border: "none",
-              borderRadius: 10
-            }}
-          >
-            ❌ Cancel
-          </button>
+          <button onClick={savePump}>Save Pump</button>
         </div>
       )}
-    </div>
+
+      {/* Footer */}
+      <div className="footer">
+        Developed by 
+        <a href="https://www.facebook.com/mijanurrmiraj" target="_blank">
+          Mijanur R. Miraj
+        </a>
+      </div>
+    </>
   );
 }
-<div style={{
-  position: "fixed",
-  bottom: 0,
-  left: 0,
-  width: "100%",
-  height: "35%",
-  background: "#0f7d3b",
-  borderTopLeftRadius: "20px",
-  borderTopRightRadius: "20px",
-  padding: "10px",
-  overflowY: "scroll",
-  color: "#fff",
-  zIndex: 999
-}}>
-  <h3>🔥 Active Pumps</h3>
-
-  {pumps.map((p, i) => (
-    <div key={i} style={{
-      background: "#fff",
-      color: "#000",
-      padding: 10,
-      borderRadius: 10,
-      marginBottom: 10
-    }}>
-      <b>{p.name}</b><br/>
-      ⛽ {p.fuelType} <br/>
-      ⏳ {p.minutes} min
-    </div>
-  ))}
-</div>
-{/* 🔥 Developer Footer */}
-<div
-  style={{
-    position: "fixed",
-    bottom: 10,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#ffffff",
-    padding: "10px 20px",
-    borderRadius: "20px",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.2)",
-    zIndex: 1000,
-    textAlign: "center",
-    fontSize: "14px",
-  }}
->
-  <div style={{ marginBottom: "5px", fontWeight: "bold" }}>
-    🚀 Developed by
-  </div>
-
-  <a
-    href="https://www.facebook.com/mijanurrmiraj"
-    target="_blank"
-    style={{
-      color: "#0f7d3b",
-      fontWeight: "bold",
-      textDecoration: "none",
-    }}
-  >
-    Mijanur R. Miraj
-  </a>
-</div>
