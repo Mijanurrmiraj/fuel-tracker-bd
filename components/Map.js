@@ -9,7 +9,7 @@ import {
 } from "react-leaflet";
 import { useEffect, useState } from "react";
 
-// 📍 Click করলে temporary marker দেখাবে
+// 📍 Map click handler
 function ClickHandler({ setSelected }) {
   useMapEvents({
     click(e) {
@@ -20,15 +20,20 @@ function ClickHandler({ setSelected }) {
 }
 
 export default function Map({ pumps, onAddPump }) {
-  const [userLocation, setUserLocation] = useState([23.685, 90.3563]);
+  const [userLocation, setUserLocation] = useState([23.685, 90.3563]); // default BD
   const [selected, setSelected] = useState(null);
 
-  // 📍 GPS location
+  // 📍 User GPS location
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        setUserLocation([pos.coords.latitude, pos.coords.longitude]);
-      });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation([pos.coords.latitude, pos.coords.longitude]);
+        },
+        () => {
+          console.log("Location permission denied");
+        }
+      );
     }
   }, []);
 
@@ -37,27 +42,34 @@ export default function Map({ pumps, onAddPump }) {
       <MapContainer
         center={userLocation}
         zoom={7}
-        style={{ height: "70vh", width: "100%" }}
+        style={{
+          height: "75vh",
+          width: "100%",
+        }}
       >
+        {/* 🗺 Map tiles */}
         <TileLayer
           attribution="&copy; OpenStreetMap"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Click Handler */}
+        {/* 📍 Click select */}
         <ClickHandler setSelected={setSelected} />
 
-        {/* 📍 Existing pumps */}
-        {pumps.map((pump, i) => (
-          <Marker key={i} position={[pump.lat, pump.lng]}>
+        {/* 🔥 Existing pumps */}
+        {pumps.map((pump, index) => (
+          <Marker key={index} position={[pump.lat, pump.lng]}>
             <Popup>
-              ⛽ {pump.fuelType} <br />
-              ⏳ {pump.minutes} min
+              <div style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                <b>📍 {pump.name || "Pump"}</b> <br />
+                ⛽ {pump.fuelType} <br />
+                ⏳ {pump.remaining || pump.minutes} min left
+              </div>
             </Popup>
           </Marker>
         ))}
 
-        {/* 🟢 Selected marker preview */}
+        {/* 🟢 Selected location preview */}
         {selected && (
           <Marker position={[selected.lat, selected.lng]}>
             <Popup>📍 New Pump Location</Popup>
@@ -65,30 +77,38 @@ export default function Map({ pumps, onAddPump }) {
         )}
       </MapContainer>
 
-      {/* 🔥 ADD BUTTON (after select) */}
+      {/* 🔥 Bottom Add Button */}
       {selected && (
-        <div style={{
-          position: "fixed",
-          bottom: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "#000",
-          color: "#fff",
-          padding: "10px 20px",
-          borderRadius: "20px",
-          zIndex: 999
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#000",
+            color: "#fff",
+            padding: "12px 18px",
+            borderRadius: "20px",
+            zIndex: 999,
+            textAlign: "center",
+            boxShadow: "0 5px 20px rgba(0,0,0,0.3)"
+          }}
+        >
           📍 Location Selected
           <br />
           <button
-            onClick={() => onAddPump(selected.lat, selected.lng)}
+            onClick={() => {
+              onAddPump(selected.lat, selected.lng);
+              setSelected(null); // reset
+            }}
             style={{
-              marginTop: 5,
-              padding: "8px 12px",
+              marginTop: 6,
+              padding: "8px 14px",
               background: "green",
               border: "none",
               color: "#fff",
-              borderRadius: 10
+              borderRadius: 10,
+              fontSize: "14px"
             }}
           >
             ➕ Add Pump Here
