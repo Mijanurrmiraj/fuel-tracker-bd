@@ -1,5 +1,5 @@
 "use client";
-
+import { db } from "./firebase";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
