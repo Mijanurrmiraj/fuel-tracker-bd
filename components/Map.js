@@ -1,16 +1,20 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
-const Map = dynamic(() => import("../components/Map"), {
-  ssr: false,
-});
-
-export default function Page() {
+export default function Map() {
   return (
-    <main>
-      <h1 style={{ textAlign: "center" }}>⛽ Fuel Map BD</h1>
-      <Map />
-    </main>
+    <MapContainer
+      center={[23.685, 90.3563]}
+      zoom={7}
+      style={{ height: "80vh", width: "100%" }}
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      
+      <Marker position={[23.685, 90.3563]}>
+        <Popup>Test Fuel Pump</Popup>
+      </Marker>
+    </MapContainer>
   );
 }
