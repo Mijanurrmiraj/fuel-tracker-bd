@@ -2,126 +2,79 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { db } from "../firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { ref, push, onValue } from "firebase/database";
 
-const Map = dynamic(() => import("../components/Map"), {
-  ssr: false,
-});
+const Map = dynamic(() => import("../components/Map"), { ssr: false });
 
 export default function Home() {
   const [pumps, setPumps] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [minutes, setMinutes] = useState("");
+  const [fuelType, setFuelType] = useState("");
 
-  const [form, setForm] = useState({
-    name: "",
-    fuel: "Petrol",
-    minutes: "",
-  });
-
-  const fetchData = async () => {
-    const querySnapshot = await getDocs(collection(db, "pumps"));
-    const data = querySnapshot.docs.map((doc) => doc.data());
-    setPumps(data);
-  };
-
+  // 🔥 Realtime sync (ALL DEVICE)
   useEffect(() => {
-    fetchData();
+    const pumpsRef = ref(db, "pumps");
+
+    onValue(pumpsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.values(data);
+        setPumps(list);
+      } else {
+        setPumps([]);
+      }
+    });
   }, []);
 
-  const handleAdd = async () => {
-    if (!selectedLocation) return alert("Map এ click করো!");
+  // ➕ Add Pump
+  const addPump = (lat, lng) => {
+    if (!minutes || !fuelType) {
+      alert("সব ফিল্ড পূরণ করুন");
+      return;
+    }
 
-    await addDoc(collection(db, "pumps"), {
-      ...form,
-      minutes: parseInt(form.minutes),
-      lat: selectedLocation.lat,
-      lng: selectedLocation.lng,
-      createdAt: Date.now(),
+    const pumpsRef = ref(db, "pumps");
+
+    push(pumpsRef, {
+      lat,
+      lng,
+      fuelType,
+      minutes: parseInt(minutes),
+      createdAt: Date.now()
     });
 
-    setForm({ name: "", fuel: "Petrol", minutes: "" });
-    setSelectedLocation(null);
-    fetchData();
+    alert("✅ Pump Added!");
+    setMinutes("");
+    setFuelType("");
   };
 
   return (
     <div>
-      {/* 🔥 Header */}
-      <div style={{
-        padding: "12px",
-        background: "#111",
-        color: "#fff",
-        fontSize: "20px",
-        fontWeight: "bold"
-      }}>
-        ⛽ Fuel Map BD
+      <h1 style={{ textAlign: "center" }}>⛽ Fuel Map BD</h1>
+
+      {/* INPUT FORM */}
+      <div style={{ padding: 10 }}>
+        <select
+          value={fuelType}
+          onChange={(e) => setFuelType(e.target.value)}
+        >
+          <option value="">Select Fuel</option>
+          <option value="Petrol">Petrol</option>
+          <option value="Octane">Octane</option>
+          <option value="Diesel">Diesel</option>
+        </select>
+
+        <input
+          type="number"
+          placeholder="Minutes থাকবে"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+        />
       </div>
 
-      {/* 🗺️ Map */}
-      <Map pumps={pumps} onMapClick={setSelectedLocation} />
-
-      {/* 📍 Bottom Form (Mobile Friendly) */}
-      {selectedLocation && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            background: "#fff",
-            padding: "15px",
-            boxShadow: "0 -2px 10px rgba(0,0,0,0.3)",
-            zIndex: 9999,
-            maxHeight: "40vh",
-            overflowY: "auto",
-            borderTopLeftRadius: "15px",
-            borderTopRightRadius: "15px"
-          }}
-        >
-          <h3>⛽ Add Fuel Pump</h3>
-
-          <input
-            placeholder="Pump Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
-          />
-
-          <select
-            value={form.fuel}
-            onChange={(e) => setForm({ ...form, fuel: e.target.value })}
-            style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
-          >
-            <option>Petrol</option>
-            <option>Diesel</option>
-            <option>Octane</option>
-          </select>
-
-          <input
-            placeholder="Minutes থাকবে"
-            type="number"
-            value={form.minutes}
-            onChange={(e) => setForm({ ...form, minutes: e.target.value })}
-            style={{ width: "100%", marginBottom: "10px", padding: "8px" }}
-          />
-
-          <button
-            onClick={handleAdd}
-            style={{
-              width: "100%",
-              padding: "12px",
-              background: "green",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "16px"
-            }}
-          >
-            ✅ Save Pump
-          </button>
-        </div>
-      )}
+      {/* MAP */}
+      <Map pumps={pumps} onAddPump={addPump} />
     </div>
   );
 }
