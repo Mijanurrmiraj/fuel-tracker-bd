@@ -6,11 +6,11 @@ const Map = dynamic(() => import("../components/Map"), {
   ssr: false,
 });
 
-export default function Home() {
+export default function Page() {
   return (
-    <div>
+    <main>
       <h1 style={{ textAlign: "center" }}>⛽ Fuel Map BD</h1>
       <Map />
-    </div>
+    </main>
   );
 }
