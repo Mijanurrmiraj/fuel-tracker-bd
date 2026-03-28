@@ -9,20 +9,21 @@ import {
 } from "react-leaflet";
 import { useEffect, useState } from "react";
 
-// 📍 Click করলে location নেওয়া
-function AddMarker({ onAdd }) {
+// 📍 Click করলে temporary marker দেখাবে
+function ClickHandler({ setSelected }) {
   useMapEvents({
     click(e) {
-      onAdd(e.latlng.lat, e.latlng.lng);
+      setSelected(e.latlng);
     },
   });
   return null;
 }
 
 export default function Map({ pumps, onAddPump }) {
-  const [userLocation, setUserLocation] = useState([23.685, 90.3563]); // default BD
+  const [userLocation, setUserLocation] = useState([23.685, 90.3563]);
+  const [selected, setSelected] = useState(null);
 
-  // 📍 User GPS location
+  // 📍 GPS location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
@@ -32,37 +33,68 @@ export default function Map({ pumps, onAddPump }) {
   }, []);
 
   return (
-    <MapContainer
-      center={userLocation}
-      zoom={7}
-      style={{
-        height: "100vh",
-        width: "100%",
-      }}
-    >
-      {/* 🗺 Map Tile */}
-      <TileLayer
-        attribution="&copy; OpenStreetMap"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <>
+      <MapContainer
+        center={userLocation}
+        zoom={7}
+        style={{ height: "70vh", width: "100%" }}
+      >
+        <TileLayer
+          attribution="&copy; OpenStreetMap"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      {/* ➕ Add Pump on Click */}
-      <AddMarker onAdd={onAddPump} />
+        {/* Click Handler */}
+        <ClickHandler setSelected={setSelected} />
 
-      {/* 📍 Pump Markers */}
-      {pumps.map((pump, index) => (
-        <Marker key={index} position={[pump.lat, pump.lng]}>
-          <Popup>
-            <div style={{
-              fontSize: "14px",
-              lineHeight: "1.5"
-            }}>
-              <b>⛽ {pump.fuelType}</b> <br />
-              ⏳ {pump.remaining || pump.minutes} min left
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        {/* 📍 Existing pumps */}
+        {pumps.map((pump, i) => (
+          <Marker key={i} position={[pump.lat, pump.lng]}>
+            <Popup>
+              ⛽ {pump.fuelType} <br />
+              ⏳ {pump.minutes} min
+            </Popup>
+          </Marker>
+        ))}
+
+        {/* 🟢 Selected marker preview */}
+        {selected && (
+          <Marker position={[selected.lat, selected.lng]}>
+            <Popup>📍 New Pump Location</Popup>
+          </Marker>
+        )}
+      </MapContainer>
+
+      {/* 🔥 ADD BUTTON (after select) */}
+      {selected && (
+        <div style={{
+          position: "fixed",
+          bottom: 20,
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "#000",
+          color: "#fff",
+          padding: "10px 20px",
+          borderRadius: "20px",
+          zIndex: 999
+        }}>
+          📍 Location Selected
+          <br />
+          <button
+            onClick={() => onAddPump(selected.lat, selected.lng)}
+            style={{
+              marginTop: 5,
+              padding: "8px 12px",
+              background: "green",
+              border: "none",
+              color: "#fff",
+              borderRadius: 10
+            }}
+          >
+            ➕ Add Pump Here
+          </button>
+        </div>
+      )}
+    </>
   );
 }
