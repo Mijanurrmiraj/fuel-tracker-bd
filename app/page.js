@@ -183,3 +183,65 @@ export default function Home() {
     </div>
   );
 }
+<div style={{
+  position: "fixed",
+  bottom: 0,
+  left: 0,
+  width: "100%",
+  height: "35%",
+  background: "#0f7d3b",
+  borderTopLeftRadius: "20px",
+  borderTopRightRadius: "20px",
+  padding: "10px",
+  overflowY: "scroll",
+  color: "#fff",
+  zIndex: 999
+}}>
+  <h3>🔥 Active Pumps</h3>
+
+  {pumps.map((p, i) => (
+    <div key={i} style={{
+      background: "#fff",
+      color: "#000",
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 10
+    }}>
+      <b>{p.name}</b><br/>
+      ⛽ {p.fuelType} <br/>
+      ⏳ {p.minutes} min
+    </div>
+  ))}
+</div>
+{/* 🔥 Developer Footer */}
+<div
+  style={{
+    position: "fixed",
+    bottom: 10,
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#ffffff",
+    padding: "10px 20px",
+    borderRadius: "20px",
+    boxShadow: "0 5px 20px rgba(0,0,0,0.2)",
+    zIndex: 1000,
+    textAlign: "center",
+    fontSize: "14px",
+  }}
+>
+  <div style={{ marginBottom: "5px", fontWeight: "bold" }}>
+    🚀 Developed by
+  </div>
+
+  <a
+    href="https://www.facebook.com/mijanurrmiraj"
+    target="_blank"
+    style={{
+      color: "#0f7d3b",
+      fontWeight: "bold",
+      textDecoration: "none",
+    }}
+  >
+    Mijanur R. Miraj
+  </a>
+</div>
