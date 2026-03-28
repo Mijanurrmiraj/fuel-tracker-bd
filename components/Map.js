@@ -3,6 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+// 📍 Map click detect
 function LocationMarker({ onMapClick }) {
   useMapEvents({
     click(e) {
@@ -14,8 +15,12 @@ function LocationMarker({ onMapClick }) {
 
 export default function Map({ pumps = [], onMapClick }) {
   return (
-    <div style={{ height: "75vh" }}>
-      <MapContainer center={[23.685, 90.3563]} zoom={7} style={{ height: "100%" }}>
+    <div style={{ height: "60vh" }}>
+      <MapContainer
+        center={[23.685, 90.3563]}
+        zoom={7}
+        style={{ height: "100%", width: "100%" }}
+      >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         <LocationMarker onMapClick={onMapClick} />
