@@ -1,8 +1,8 @@
-import "./globals.css";
+iimport "./globals.css";
 
 export const metadata = {
   title: "Fuel Map BD",
-  description: "Find fuel easily",
+  description: "Fuel finder app",
 };
 
 export default function RootLayout({ children }) {
