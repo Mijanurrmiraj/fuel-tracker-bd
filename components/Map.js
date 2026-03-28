@@ -1,38 +1,31 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-export default function Map({ pumps = [] }) {
-  const [timeData, setTimeData] = useState(pumps);
+function LocationMarker({ onMapClick }) {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng);
+    },
+  });
+  return null;
+}
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeData((prev) =>
-        prev.map((p) => ({
-          ...p,
-          minutes: p.minutes > 0 ? p.minutes - 1 : 0,
-        }))
-      );
-    }, 60000); // প্রতি ১ মিনিটে কমবে
-
-    return () => clearInterval(interval);
-  }, []);
-
+export default function Map({ pumps = [], onMapClick }) {
   return (
-    <div style={{ height: "80vh" }}>
+    <div style={{ height: "75vh" }}>
       <MapContainer center={[23.685, 90.3563]} zoom={7} style={{ height: "100%" }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {timeData.map((pump, i) => (
+        <LocationMarker onMapClick={onMapClick} />
+
+        {pumps.map((pump, i) => (
           <Marker key={i} position={[pump.lat, pump.lng]}>
             <Popup>
-              <div style={{ fontSize: "14px" }}>
-                <b>{pump.name}</b> <br />
-                ⛽ Fuel: {pump.fuel} <br />
-                ⏳ Time left: {pump.minutes} min
-              </div>
+              <b>{pump.name}</b> <br />
+              ⛽ {pump.fuel} <br />
+              ⏳ {pump.minutes} min
             </Popup>
           </Marker>
         ))}
