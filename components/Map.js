@@ -8,64 +8,48 @@ import {
   useMapEvents
 } from "react-leaflet";
 
-import MarkerClusterGroup from "react-leaflet-cluster";
 import { useState } from "react";
+import "leaflet/dist/leaflet.css";
 
-// 📍 click handler
-function ClickHandler({ setSelected }) {
+function ClickHandler({ setLocation }) {
   useMapEvents({
     click(e) {
-      setSelected(e.latlng);
-    },
+      setLocation(e.latlng);
+    }
   });
   return null;
 }
 
-export default function Map({ pumps, onAddPump }) {
-  const [selected, setSelected] = useState(null);
+export default function Map({ pumps, addPump }) {
+  const [location, setLocation] = useState(null);
 
   return (
     <>
       <MapContainer
         center={[23.685, 90.3563]}
         zoom={7}
-        style={{ height: "100vh", width: "100%" }}
+        style={{ height: "100vh" }}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        <ClickHandler setSelected={setSelected} />
+        <ClickHandler setLocation={setLocation} />
 
-        {/* 🔥 CLUSTER */}
-        <MarkerClusterGroup chunkedLoading>
-          {pumps.map((pump, i) => (
-            <Marker key={i} position={[pump.lat, pump.lng]}>
-              <Popup>
-                <b>{pump.name}</b> <br />
-                ⛽ {pump.fuelType} <br />
-                ⏳ {pump.minutes} min
-              </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
-
-        {selected && (
-          <Marker position={[selected.lat, selected.lng]}>
-            <Popup>New Pump</Popup>
+        {pumps.map((p, i) => (
+          <Marker key={i} position={[p.lat, p.lng]}>
+            <Popup>
+              <b>{p.name}</b> <br />
+              ⛽ {p.fuelType} <br />
+              ⏳ {p.minutes} min
+            </Popup>
           </Marker>
-        )}
+        ))}
       </MapContainer>
 
-      {/* ➕ Floating Button */}
+      {/* Floating Button */}
       <button
         onClick={() => {
-          if (selected) {
-            onAddPump(selected.lat, selected.lng);
-            setSelected(null);
-          } else {
-            alert("Map এ ক্লিক করে location select করো");
-          }
+          if (!location) return alert("Map এ ক্লিক করো");
+          addPump(location);
         }}
         style={{
           position: "fixed",
@@ -76,10 +60,9 @@ export default function Map({ pumps, onAddPump }) {
           borderRadius: "50%",
           background: "#ff9800",
           color: "#fff",
-          fontSize: 30,
+          fontSize: 28,
           border: "none",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.3)",
-          zIndex: 999,
+          zIndex: 999
         }}
       >
         +
