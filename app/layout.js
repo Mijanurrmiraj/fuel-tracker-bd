@@ -1,18 +1,14 @@
-body {
-  margin: 0;
-  background: #0f172a;
-  color: white;
-  font-family: sans-serif;
-}
+import "./globals.css";
 
-input, select, button {
-  margin: 5px;
-  padding: 8px;
-  border-radius: 5px;
-  border: none;
-}
+export const metadata = {
+  title: "Fuel Map BD",
+  description: "Find fuel easily",
+};
 
-button {
-  background: #22c55e;
-  color: white;
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
 }
