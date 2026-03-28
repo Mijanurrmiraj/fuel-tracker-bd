@@ -10,8 +10,10 @@ const Map = dynamic(() => import("../components/Map"), { ssr: false });
 export default function Home() {
   const [pumps, setPumps] = useState([]);
   const [showForm, setShowForm] = useState(false);
+
   const [fuelType, setFuelType] = useState("");
   const [minutes, setMinutes] = useState("");
+  const [name, setName] = useState("");
 
   // 🔥 Realtime sync
   useEffect(() => {
@@ -25,14 +27,16 @@ export default function Home() {
     });
   }, []);
 
+  // ➕ Add pump
   const addPump = (lat, lng) => {
-    if (!fuelType || !minutes) return alert("সব পূরণ করো");
+    if (!fuelType || !minutes || !name) {
+      return alert("সব তথ্য দিন");
+    }
 
-    const pumpsRef = ref(db, "pumps");
-
-    push(pumpsRef, {
+    push(ref(db, "pumps"), {
       lat,
       lng,
+      name,
       fuelType,
       minutes: parseInt(minutes),
       createdAt: Date.now(),
@@ -41,23 +45,23 @@ export default function Home() {
     setShowForm(false);
     setFuelType("");
     setMinutes("");
+    setName("");
   };
 
   return (
     <div>
-      {/* 🔥 HEADER */}
+      {/* HEADER */}
       <div style={{
         background: "#000",
         color: "#fff",
-        padding: "12px",
-        fontSize: "20px",
-        fontWeight: "bold",
-        textAlign: "center"
+        padding: 12,
+        textAlign: "center",
+        fontWeight: "bold"
       }}>
         ⛽ Fuel Map BD
       </div>
 
-      {/* 🗺 MAP */}
+      {/* MAP */}
       <Map pumps={pumps} onAddPump={(lat, lng) => {
         setShowForm(true);
         window.selectedLocation = { lat, lng };
@@ -73,33 +77,52 @@ export default function Home() {
           background: "#ff3d00",
           color: "#fff",
           border: "none",
-          padding: "15px",
+          padding: 15,
           borderRadius: "50%",
-          fontSize: "20px",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.3)"
+          fontSize: 20,
+          zIndex: 1000
         }}
       >
         +
       </button>
 
-      {/* 📱 BOTTOM SHEET FORM */}
+      {/* 🔥 FULL SCREEN FORM (MOBILE FIX) */}
       {showForm && (
         <div style={{
           position: "fixed",
-          bottom: 0,
+          top: 0,
+          left: 0,
           width: "100%",
+          height: "100%",
           background: "#fff",
-          padding: 20,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          boxShadow: "0 -5px 20px rgba(0,0,0,0.2)"
+          zIndex: 2000,
+          overflowY: "auto",
+          padding: 20
         }}>
-          <h3>Add Fuel Pump</h3>
+          <h2>Add Fuel Pump</h2>
 
+          {/* Pump Name */}
+          <input
+            type="text"
+            placeholder="Pump Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginBottom: 10
+            }}
+          />
+
+          {/* Fuel */}
           <select
             value={fuelType}
             onChange={(e) => setFuelType(e.target.value)}
-            style={{ width: "100%", padding: 10, marginBottom: 10 }}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginBottom: 10
+            }}
           >
             <option value="">Select Fuel</option>
             <option>Petrol</option>
@@ -107,14 +130,20 @@ export default function Home() {
             <option>Diesel</option>
           </select>
 
+          {/* Minutes */}
           <input
             type="number"
-            placeholder="Minutes থাকবে"
+            placeholder="কত মিনিট তেল থাকবে"
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
-            style={{ width: "100%", padding: 10, marginBottom: 10 }}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginBottom: 10
+            }}
           />
 
+          {/* Save */}
           <button
             onClick={() =>
               addPump(
@@ -124,28 +153,30 @@ export default function Home() {
             }
             style={{
               width: "100%",
-              padding: 12,
+              padding: 15,
               background: "green",
               color: "#fff",
               border: "none",
-              borderRadius: 10
+              borderRadius: 10,
+              fontSize: 16
             }}
           >
             ✅ Save Pump
           </button>
 
+          {/* Cancel */}
           <button
             onClick={() => setShowForm(false)}
             style={{
               width: "100%",
-              padding: 10,
-              marginTop: 5,
+              padding: 12,
+              marginTop: 10,
               background: "#ccc",
               border: "none",
               borderRadius: 10
             }}
           >
-            Cancel
+            ❌ Cancel
           </button>
         </div>
       )}
