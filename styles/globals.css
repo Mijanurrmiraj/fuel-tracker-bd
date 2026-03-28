@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #0f7d3b;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.bottomSheet {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #fff;
+  padding: 15px;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+}
+
+.bottomSheet input,
+.bottomSheet select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.bottomSheet button {
+  width: 100%;
+  padding: 12px;
+  background: green;
+  color: white;
+  border: none;
+}
+
+.footer {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+}
