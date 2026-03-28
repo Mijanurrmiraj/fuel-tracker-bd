@@ -39,6 +39,7 @@ function ClickHandler({ setLocation }) {
 export default function Map() {
   const [location, setLocation] = useState(null);
   const [pumps, setPumps] = useState([]);
+  const [livePumps, setLivePumps] = useState([]);
 
   // 🔥 Form state
   const [showForm, setShowForm] = useState(false);
@@ -48,15 +49,33 @@ export default function Map() {
 
   // 🔥 Load realtime data
   useEffect(() => {
-    const pumpRef = ref(db, "pumps");
+  const pumpRef = ref(db, "pumps");
 
-    onValue(pumpRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setPumps(Object.values(data));
-      }
-    });
-  }, []);
+  onValue(pumpRef, (snapshot) => {
+    const data = snapshot.val();
+
+    if (data) {
+      const list = Object.values(data);
+
+      const updated = list
+        .map((p) => {
+          const passed = Math.floor(
+            (Date.now() - p.createdAt) / 60000
+          );
+
+          const remaining = p.minutes - passed;
+
+          return {
+            ...p,
+            remaining,
+          };
+        })
+        .filter((p) => p.remaining > 0);
+
+      setLivePumps(updated);
+    }
+  });
+}, []);
 
   // ➕ Add pump
   const savePump = () => {
@@ -93,12 +112,12 @@ export default function Map() {
         <ClickHandler setLocation={setLocation} />
 
         {/* Existing pumps */}
-        {pumps.map((p, i) => (
+        {livePumps.map((p, i) => (
           <Marker key={i} position={[p.lat, p.lng]}>
             <Popup>
               <b>{p.name}</b> <br />
               ⛽ {p.fuel} <br />
-              ⏳ {p.minutes} min
+              ⏳ {p.remaining} min left
             </Popup>
           </Marker>
         ))}
