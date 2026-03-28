@@ -7,8 +7,7 @@ const firebaseConfig = {
   projectId: "fuel-tracker-bd-fcd3e",
   storageBucket: "fuel-tracker-bd-fcd3e.appspot.com",
   messagingSenderId: "773182498776",
-  appId: "1:773182498776:web:885520cc0d1b36d0fef4ad",
-  measurementId: "G-XK2EB939MV"
+  appId: "1:773182498776:web:885520c00d1b36d0fef4ad",
 };
 
 const app = initializeApp(firebaseConfig);
