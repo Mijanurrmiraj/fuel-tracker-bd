@@ -11,7 +11,6 @@ const Map = dynamic(() => import("../components/Map"), {
 
 export default function Home() {
   const [pumps, setPumps] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   const [form, setForm] = useState({
@@ -31,7 +30,7 @@ export default function Home() {
   }, []);
 
   const handleAdd = async () => {
-    if (!selectedLocation) return alert("Map থেকে location select করো!");
+    if (!selectedLocation) return alert("Map এ click করো!");
 
     await addDoc(collection(db, "pumps"), {
       ...form,
@@ -62,29 +61,37 @@ export default function Home() {
       {/* 🗺️ Map */}
       <Map pumps={pumps} onMapClick={setSelectedLocation} />
 
-      {/* 📍 Location Selected */}
+      {/* 📍 Bottom Form (Mobile Friendly) */}
       {selectedLocation && (
-        <div style={{
-          position: "fixed",
-          bottom: "0",
-          width: "100%",
-          background: "#fff",
-          padding: "15px",
-          boxShadow: "0 -2px 10px rgba(0,0,0,0.2)"
-        }}>
-          <h3>Add Fuel Pump</h3>
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            background: "#fff",
+            padding: "15px",
+            boxShadow: "0 -2px 10px rgba(0,0,0,0.3)",
+            zIndex: 9999,
+            maxHeight: "40vh",
+            overflowY: "auto",
+            borderTopLeftRadius: "15px",
+            borderTopRightRadius: "15px"
+          }}
+        >
+          <h3>⛽ Add Fuel Pump</h3>
 
           <input
             placeholder="Pump Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            style={{ width: "100%", marginBottom: "8px" }}
+            style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
           />
 
           <select
             value={form.fuel}
             onChange={(e) => setForm({ ...form, fuel: e.target.value })}
-            style={{ width: "100%", marginBottom: "8px" }}
+            style={{ width: "100%", marginBottom: "8px", padding: "8px" }}
           >
             <option>Petrol</option>
             <option>Diesel</option>
@@ -96,16 +103,21 @@ export default function Home() {
             type="number"
             value={form.minutes}
             onChange={(e) => setForm({ ...form, minutes: e.target.value })}
-            style={{ width: "100%", marginBottom: "10px" }}
+            style={{ width: "100%", marginBottom: "10px", padding: "8px" }}
           />
 
-          <button onClick={handleAdd} style={{
-            width: "100%",
-            padding: "10px",
-            background: "green",
-            color: "#fff",
-            border: "none"
-          }}>
+          <button
+            onClick={handleAdd}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "green",
+              color: "#fff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "16px"
+            }}
+          >
             ✅ Save Pump
           </button>
         </div>
