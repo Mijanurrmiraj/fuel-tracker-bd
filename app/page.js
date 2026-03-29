@@ -21,40 +21,21 @@ export default function Home() {
   return (
     <main style={{ height: "100vh", width: "100%", position: "relative" }}>
 
-      {/* 🔥 TOP AD */}
-      <div
-        style={{
-          position: "fixed",
-          top: "60px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 9999,
-        }}
-      >
-        <div id="ad-container"></div>
-
-        <Script id="ad-script" strategy="afterInteractive">
-          {`
-            var atOptions = {
-              key: 'd116af3e9f488e6e92cf7b9f8bed5696',
-              format: 'iframe',
-              height: 250,
-              width: 300,
-              params: {}
-            };
-
-            var script = document.createElement('script');
-            script.src = "https://www.highperformanceformat.com/d116af3e9f488e6e92cf7b9f8bed5696/invoke.js";
-            script.async = true;
-
-            var container = document.getElementById('ad-container');
-            if (container) {
-              container.innerHTML = "";
-              container.appendChild(script);
-            }
-          `}
-        </Script>
-      </div>
+    {/* 🔥 TOP AD (NEW SCRIPT) */}
+<div
+  style={{
+    position: "fixed",
+    top: "60px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 9999,
+  }}
+>
+  <Script
+    src="https://pl29006565.profitablecpmratenetwork.com/35/85/64/358564c61f1df6c62752f23bba03e089.js"
+    strategy="afterInteractive"
+  />
+</div>
 
       {/* 🗺️ MAP */}
       <Map />
