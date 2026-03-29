@@ -28,10 +28,12 @@ export default function Home() {
           top: "60px",
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 999,
+          zIndex: 9999,
         }}
       >
-        <Script id="ad-options" strategy="afterInteractive">
+        <div id="ad-container"></div>
+
+        <Script id="ad-script" strategy="afterInteractive">
           {`
             var atOptions = {
               key: 'd116af3e9f488e6e92cf7b9f8bed5696',
@@ -40,40 +42,57 @@ export default function Home() {
               width: 300,
               params: {}
             };
+
+            var script = document.createElement('script');
+            script.src = "https://www.highperformanceformat.com/d116af3e9f488e6e92cf7b9f8bed5696/invoke.js";
+            script.async = true;
+
+            var container = document.getElementById('ad-container');
+            if (container) {
+              container.innerHTML = "";
+              container.appendChild(script);
+            }
           `}
         </Script>
-
-        <Script
-          src="https://www.highperformanceformat.com/d116af3e9f488e6e92cf7b9f8bed5696/invoke.js"
-          strategy="afterInteractive"
-        />
       </div>
 
       {/* 🗺️ MAP */}
       <Map />
 
-      {/* 🔥 Developer Credit */}
+      {/* 🔥 Developer Credit + Bottom Ad Combo */}
       <div
         style={{
           position: "fixed",
-          bottom: "10px",
+          bottom: "15px",
           left: "50%",
           transform: "translateX(-50%)",
-          background: "#000",
-          color: "#fff",
-          padding: "6px 12px",
-          borderRadius: "10px",
-          fontSize: "12px",
+          zIndex: 9999,
+          textAlign: "center",
         }}
       >
-        Developed by{" "}
-        <a
-          href="https://www.facebook.com/mijanurrmiraj"
-          target="_blank"
-          style={{ color: "#00ffcc" }}
+        {/* Developer */}
+        <div
+          style={{
+            background: "rgba(0,0,0,0.8)",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "15px",
+            fontSize: "12px",
+            marginBottom: "6px",
+          }}
         >
-          Mijanur R. Miraj
-        </a>
+          Developed by{" "}
+          <a
+            href="https://www.facebook.com/mijanurrmiraj"
+            target="_blank"
+            style={{ color: "#00ffcc", textDecoration: "none" }}
+          >
+            Mijanur R. Miraj
+          </a>
+        </div>
+
+        {/* Bottom Ad (optional future use) */}
+        <div id="bottom-ad"></div>
       </div>
 
     </main>
