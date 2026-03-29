@@ -17,7 +17,6 @@ const Map = dynamic(() => import("../components/Map"), {
     </div>
   ),
 });
-
 export default function Home() {
   return (
     <main style={{ height: "100vh", width: "100%", position: "relative" }}>
